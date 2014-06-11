@@ -13,12 +13,36 @@
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
     </repositories>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>1.7.9-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.gmail.filoghost</groupId>
+            <artifactId>holographic-displays</artifactId>
+            <version>1.8.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/lib/HolographicDisplays.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

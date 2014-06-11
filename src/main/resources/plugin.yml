@@ -1,0 +1,31 @@
+name: HolographicScoreboard
+main: dk.lockfuglsang.wolfencraft.HolographicScoreboard
+author: R4zorax
+version: 0.1
+softdepend: [HolographicDisplays, ProtocolLib]
+commands:
+  holographicscoreboard:
+    description: Holographic Scoreboard
+    usage: |
+      §3/<command> §6list §7- Lists all the current scoreboards
+      §3/<command> §6create §2<scoreboard-name> <update-every> <cmd>
+      §3/<command> §6remove §2<scoreboard-name>
+      §3/<command> §6info §7- Prints information about Holographic Scoreboard
+      §3/<command> §6reload §7- Reloads configuration
+      §3/<command> §6save §7- Saves configuration
+      §3/<command> §6cleanup §7- Removes all holograms
+    aliases: hgs
+
+permissions:
+  holographicscoreboard.*:
+    description: Gives access to all the Holographic Scoreboard commands
+    children:
+      holographicscoreboard.admin: true
+      holographicscoreboard.list: true
+  holographicscoreboard.admin:
+    description: Allows the user to edit scoreboards
+    default: op
+  holographicscoreboard.list:
+    description: Allows the user to list and inspect scoreboards.
+    default: true
+
