@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * TODO: Rasmus javadoc
+ * Simple conversions between ticks and string denoting intervals (i.e. 3m, 15s, 5d3h45m14s).
  */
 public enum TimeUtil {
     ;

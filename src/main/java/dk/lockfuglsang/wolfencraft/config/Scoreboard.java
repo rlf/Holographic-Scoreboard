@@ -2,37 +2,45 @@ package dk.lockfuglsang.wolfencraft.config;
 
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
-import dk.lockfuglsang.wolfencraft.util.BufferedConsoleSender;
-import dk.lockfuglsang.wolfencraft.util.TimeUtil;
+import dk.lockfuglsang.wolfencraft.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.map.MinecraftFont;
 import org.bukkit.plugin.Plugin;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.concurrent.Callable;
 
 import static dk.lockfuglsang.wolfencraft.util.TimeUtil.getTicksAsTime;
 
 /**
- * TODO: Rasmus javadoc
+ * The actual Scoreboard data-object.
+ * TODO: A bit too much business logic in here... perhaps...
  */
 public class Scoreboard {
+    public enum Sender { PLAYER, CONSOLE }
+
     private String id;
     private String command;
     private Location location;
     private int refreshTicks;
-    private Hologram hologram;
+    private Sender sender;
 
-    public Scoreboard(String id, String refresh, String command, Location location) {
+    private Hologram hologram;
+    private BufferedSender bufferedSender;
+
+    public Scoreboard(String id, String refresh, Sender sender, String command, Location location) {
         this.id = id;
         this.refreshTicks = TimeUtil.getTimeAsTicks(refresh);
+        this.sender = sender;
         this.command = command;
         this.location = location;
     }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public int getRefreshTicks() {
@@ -43,50 +51,86 @@ public class Scoreboard {
         return getTicksAsTime(refreshTicks);
     }
 
-    public void setRefresh(String refresh) {
-        this.refreshTicks = TimeUtil.getTimeAsTicks(refresh);
-    }
-
     public String getCommand() {
         return command;
-    }
-
-    public void setCommand(String command) {
-        this.command = command;
-    }
-
-    public Location getLocation() {
-        return location;
     }
 
     public void setLocation(Location location) {
         this.location = location;
     }
 
+    public Location getLocation() {
+        return location;
+    }
+
+    public Sender getSender() {
+        return sender;
+    }
+
     public void refreshHologram(Plugin plugin) {
-        BufferedConsoleSender sender = new BufferedConsoleSender(Bukkit.getConsoleSender());
-        String output;
-        if (Bukkit.dispatchCommand(sender, command)) {
-            output = sender.getStdout();
-        } else {
-            output = "§4Unable to execute " + command;
+        BufferedSender sender = createBufferedSender(plugin);
+        if (sender == null || !Bukkit.dispatchCommand(sender.getSender(), command)) {
+            String output = "\u00a74Unable to execute \u00a73" + command;
+            updateHologram(plugin, output);
         }
+    }
+
+    private void updateHologram(final Plugin plugin, String output) {
         output = output.trim().replaceAll("\r", "");
-        String[] lines = getLines(output);
-        if (hologram != null && !hologram.isDeleted()) {
-            hologram.clearLines();
-            for (String line : lines) {
-                hologram.addLine(line.trim());
+        final String[] lines = getLines(output);
+        Bukkit.getScheduler().callSyncMethod(plugin, new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                if (hologram != null && !hologram.isDeleted()) {
+                    hologram.clearLines();
+                    for (String line : lines) {
+                        hologram.addLine(line);
+                    }
+                    hologram.update();
+                } else {
+                    hologram = HolographicDisplaysAPI.createHologram(plugin, location, lines);
+                }
+                return null;
             }
-            hologram.update();
+        });
+    }
+
+    // TODO: Cleanup the propertychangelisteners? perhaps a leak?
+    private BufferedSender createBufferedSender(final Plugin plugin) {
+        PropertyChangeListener changeListener = new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals("stdout")) {
+                    updateHologram(plugin, (String) evt.getNewValue());
+                }
+            }
+        };
+        if (sender == Sender.CONSOLE) {
+            if (bufferedSender != null) {
+                bufferedSender.clear();
+                return bufferedSender;
+            }
+            bufferedSender = new BufferedConsoleSender(Bukkit.getConsoleSender());
+            bufferedSender.addPropertyChangeListener(changeListener);
+            return bufferedSender;
         } else {
-            hologram = HolographicDisplaysAPI.createHologram(plugin, location, lines);
+            Player nearestPlayer = DistanceUtil.getNearestPlayer(location);
+            if (nearestPlayer == null) {
+                nearestPlayer = Bukkit.getOnlinePlayers().length > 0 ? Bukkit.getOnlinePlayers()[0] : null;
+            }
+            if (nearestPlayer != null) {
+                //bufferedSender = new BufferedPlayerSender(nearestPlayer);
+                bufferedSender = new ProxyPlayer(nearestPlayer);
+                bufferedSender.addPropertyChangeListener(changeListener);
+                return bufferedSender;
+            }
         }
+        return null;
     }
 
     private String[] getLines(String output) {
         String[] lines = output.split("\n");
-        // TODO: Add formatting + padding (perhaps we need separate holograms per line?)
+        //return StringUtil.alignLeft2(lines);
         return lines;
     }
 
