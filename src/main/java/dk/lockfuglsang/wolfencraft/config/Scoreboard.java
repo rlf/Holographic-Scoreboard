@@ -86,6 +86,7 @@ public class Scoreboard {
                     for (String line : lines) {
                         hologram.addLine(line);
                     }
+                    hologram.setLocation(location);
                     hologram.update();
                 } else {
                     hologram = HolographicDisplaysAPI.createHologram(plugin, location, lines);
