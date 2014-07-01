@@ -19,13 +19,14 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The Main Bukkit Plugin Entry Point
  */
 public final class HolographicScoreboard extends JavaPlugin {
     public static final String CMD_HGS = "holographicscoreboard";
-    private List<Scoreboard> scoreboards = new ArrayList<>();
+    private List<Scoreboard> scoreboards = new CopyOnWriteArrayList<>();
     private Map<String, BukkitTask> tasks = new HashMap<>();
 
     @Override
@@ -102,7 +103,6 @@ public final class HolographicScoreboard extends JavaPlugin {
 
     @Override
     public void saveConfig() {
-        super.saveConfig();
         ConfigWriter.save(getConfig(), scoreboards);
         try {
             getConfig().save("scoreboards.yml");
@@ -130,7 +130,8 @@ public final class HolographicScoreboard extends JavaPlugin {
                     case "reload":
                         return reloadConfig(sender);
                     case "cleanup":
-                        return removeAllHolograms();
+                        sender.sendMessage("§3Cleaned " + removeAllHolograms() + " holograms!");
+                        return true;
                     case "refresh":
                         return refreshScoreboards(sender, args);
                     case "move":
@@ -145,7 +146,7 @@ public final class HolographicScoreboard extends JavaPlugin {
     }
 
     private boolean isAllowed(CommandSender sender) {
-        return sender instanceof ConsoleCommandSender || sender.hasPermission("holographicscoreboard.admin");
+        return sender instanceof ConsoleCommandSender || sender.hasPermission("holographicscoreboard.admin") || sender.isOp();
     }
 
     private boolean moveScoreboard(CommandSender sender, String[] args) {
@@ -233,12 +234,12 @@ public final class HolographicScoreboard extends JavaPlugin {
         return false;
     }
 
-    private boolean removeAllHolograms() {
+    private int removeAllHolograms() {
         Hologram[] holograms = HolographicDisplaysAPI.getHolograms(this);
         for (Hologram hologram : holograms) {
             hologram.delete();
         }
-        return true;
+        return holograms.length;
     }
 
     private boolean reloadConfig(CommandSender sender) {

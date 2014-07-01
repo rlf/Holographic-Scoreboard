@@ -1,11 +1,11 @@
 name: HolographicScoreboard
 main: dk.lockfuglsang.wolfencraft.HolographicScoreboard
 author: R4zorax
-version: 1.0
+version: 1.1
 softdepend: [HolographicDisplays, ProtocolLib]
 commands:
   holographicscoreboard:
-    description: §2Holographic Scoreboard §fby §4R4zorax
+    description: §2Holographic Scoreboard §3v1.1 §fby §4R4zorax
     usage: |
       §2Holographic Scoreboard §fby §4R4zorax
       §3/<command> §6list §7- Lists all the current scoreboards

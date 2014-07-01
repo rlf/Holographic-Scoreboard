@@ -28,8 +28,8 @@ public class Scoreboard {
     private int refreshTicks;
     private Sender sender;
 
-    private Hologram hologram;
-    private BufferedSender bufferedSender;
+    private volatile Hologram hologram;
+    private volatile BufferedSender bufferedSender;
 
     public Scoreboard(String id, String refresh, Sender sender, String command, Location location) {
         this.id = id;
@@ -81,16 +81,11 @@ public class Scoreboard {
         Bukkit.getScheduler().callSyncMethod(plugin, new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-                if (hologram != null && !hologram.isDeleted()) {
-                    hologram.clearLines();
-                    for (String line : lines) {
-                        hologram.addLine(line);
-                    }
-                    hologram.setLocation(location);
-                    hologram.update();
-                } else {
-                    hologram = HolographicDisplaysAPI.createHologram(plugin, location, lines);
+                if (hologram != null) {
+                    hologram.delete();
+                    hologram = null;
                 }
+                hologram = HolographicDisplaysAPI.createHologram(plugin, location, lines);
                 return null;
             }
         });
