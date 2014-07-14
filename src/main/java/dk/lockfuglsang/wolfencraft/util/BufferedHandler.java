@@ -4,6 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
@@ -13,12 +14,17 @@ import java.lang.reflect.Method;
 public class BufferedHandler implements InvocationHandler {
     private final PropertyChangeSupport propertyChangeSupport;
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    private PrintStream ps = new PrintStream(baos);
+    private PrintStream ps;
 
     private Object proxee;
     public BufferedHandler(Object proxee) {
         this.proxee = proxee;
         this.propertyChangeSupport = new PropertyChangeSupport(this);
+        try {
+            ps = new PrintStream(baos, true, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("WTH! Your operating system doesn't support UTF-8, get real!");
+        }
     }
 
     @Override

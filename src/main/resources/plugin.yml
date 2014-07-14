@@ -1,13 +1,13 @@
 name: HolographicScoreboard
 main: dk.lockfuglsang.wolfencraft.HolographicScoreboard
 author: R4zorax
-version: 1.1
+version: 1.2
 softdepend: [HolographicDisplays, ProtocolLib]
 commands:
   holographicscoreboard:
-    description: §2Holographic Scoreboard §3v1.1 §fby §4R4zorax
+    description: §2Holographic Scoreboard §3v1.2 §fby §4R4zorax
     usage: |
-      §2Holographic Scoreboard §fby §4R4zorax
+      §2Holographic Scoreboard §3v1.2 §fby §4R4zorax
       §3/<command> §6list §7- Lists all the current scoreboards
       §3/<command> §6create §2<id> <interval> <player|console> <cmd>
       §3/<command> §6move §2<id> §7- Moves the board to your current position.
@@ -15,7 +15,7 @@ commands:
       §3/<command> §6reload §7- Reloads configuration
       §3/<command> §6save §7- Saves configuration
       §3/<command> §6cleanup §7- Removes all holograms
-      §3/<command> §6refresh §2[*|id] §7- Refreshes scoreboards now
+      §3/<command> §6refresh §2[id] §7- Refreshes scoreboards now
     aliases: hgs
 
 permissions:

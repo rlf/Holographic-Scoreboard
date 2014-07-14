@@ -25,6 +25,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.util.*;
 
@@ -34,13 +35,18 @@ import java.util.*;
  */
 public class ProxyPlayer implements Player, BufferedSender {
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    private PrintStream ps = new PrintStream(baos);
+    private PrintStream ps;
     private Player player;
     private PropertyChangeSupport propertyChangeSupport;
 
     public ProxyPlayer(Player player) {
         this.player = player;
         propertyChangeSupport = new PropertyChangeSupport(this);
+        try {
+            ps = new PrintStream(baos, true, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("WTH! Your operating system doesn't support UTF-8, get real!");
+        }
     }
 
     @Override

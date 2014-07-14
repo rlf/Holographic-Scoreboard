@@ -8,12 +8,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A simple persistence wrapper for the Bukkit FileConfiguration.
  */
 public enum ConfigWriter {;
-    public static void save(Configuration config, List<Scoreboard> scoreboards) {
+    public static void save(Configuration config, Set<Scoreboard> scoreboards) {
         ConfigurationSection section = config.createSection("boards");
         for (Scoreboard scoreboard : scoreboards) {
             save(section.createSection(scoreboard.getId()), scoreboard);

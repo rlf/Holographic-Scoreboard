@@ -4,6 +4,7 @@ import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import dk.lockfuglsang.wolfencraft.config.ConfigWriter;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
+import dk.lockfuglsang.wolfencraft.stats.CommandPlotter;
 import dk.lockfuglsang.wolfencraft.util.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -16,18 +17,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.map.MinecraftFont;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.mcstats.Metrics;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * The Main Bukkit Plugin Entry Point
  */
 public final class HolographicScoreboard extends JavaPlugin {
     public static final String CMD_HGS = "holographicscoreboard";
-    private List<Scoreboard> scoreboards = new CopyOnWriteArrayList<>();
-    private Map<String, BukkitTask> tasks = new HashMap<>();
+    private static final Set<Scoreboard> scoreboards = new CopyOnWriteArraySet<>();
+    private static final Map<String, BukkitTask> tasks = new HashMap<>();
+
+    private Map<String, CommandPlotter> plotters = new HashMap<>();
+    private Metrics metrics;
+    private Metrics.Graph cmdGraph;
 
     @Override
     public void onEnable() {
@@ -38,6 +45,19 @@ public final class HolographicScoreboard extends JavaPlugin {
             return;
         }
         loadScoreboards();
+        try {
+            metrics = new Metrics(this);
+            cmdGraph = metrics.createGraph("Commands");
+            if (metrics.start()) {
+                getLogger().info("MCStats enabled for HolographicScoreboard");
+            } else {
+                getLogger().warning("MCStats was not enabled for HolographicScoreboard");
+                getLogger().info("- isOptOut ; " + metrics.isOptOut());
+                getLogger().info("- config : " + metrics.getConfigFile());
+            }
+        } catch (IOException e) {
+            getLogger().severe("Unable to stat plugin: " + e.getMessage());
+        }
     }
 
     @Override
@@ -77,7 +97,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         } catch (IOException | InvalidConfigurationException e) {
             getLogger().info("No configuration found for Holographic Scoreboards!");
         }
-        scoreboards = ConfigWriter.load(getConfig());
+        scoreboards.addAll(ConfigWriter.load(getConfig()));
         for (Scoreboard scoreboard : scoreboards) {
             scheduleUpdater(scoreboard);
         }
@@ -90,6 +110,20 @@ public final class HolographicScoreboard extends JavaPlugin {
                 scoreboard.refreshHologram(HolographicScoreboard.this);
             }
         }, 0, scoreboard.getRefreshTicks()));
+        // TODO: Do stats
+        getPlotter(scoreboard.getCommand()).inc();
+    }
+
+    private synchronized CommandPlotter getPlotter(String command) {
+        if (!plotters.containsKey(command)) {
+            CommandPlotter plotter = new CommandPlotter();
+            plotters.put(command, plotter);
+            if (cmdGraph != null) {
+                cmdGraph.addPlotter(plotter);
+            }
+            // TODO: is metrics.start() required here again?
+        }
+        return plotters.get(command);
     }
 
     @Override
@@ -185,7 +219,6 @@ public final class HolographicScoreboard extends JavaPlugin {
                     suggestions.addAll(getScoreboards(args[1]));
                 } else if ("refresh".equals(args[0])) {
                     suggestions.addAll(getScoreboards(args[1]));
-                    suggestions.addAll(getSuggestions(args[1], Arrays.asList("*")));
                 }
             } else if (args.length == 3) {
                 if ("create".equals(args[0])) {
@@ -216,11 +249,7 @@ public final class HolographicScoreboard extends JavaPlugin {
     private boolean refreshScoreboards(CommandSender sender, String[] args) {
         if (args.length == 2) {
             if (args[1].equals("*")) {
-                for (Scoreboard scoreboard : scoreboards) {
-                    scoreboard.refreshHologram(this);
-                }
-                sender.sendMessage("§2Refreshed all scoreboards!");
-                return true;
+                return refreshAll(sender);
             } else {
                 Scoreboard scoreboard = getScoreboard(args[1]);
                 if (scoreboard != null) {
@@ -229,9 +258,19 @@ public final class HolographicScoreboard extends JavaPlugin {
                     return true;
                 }
             }
+        } else if (args.length == 1) {
+            return refreshAll(sender);
         }
         sender.sendMessage("§4You have to provide a valid scoreboard-id!");
         return false;
+    }
+
+    private boolean refreshAll(CommandSender sender) {
+        for (Scoreboard scoreboard : scoreboards) {
+            scoreboard.refreshHologram(this);
+        }
+        sender.sendMessage("§2Refreshed all scoreboards!");
+        return true;
     }
 
     private int removeAllHolograms() {

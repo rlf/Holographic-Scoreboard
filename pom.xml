@@ -5,12 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.lockfuglsang.wolfencraft</groupId>
     <artifactId>holographic-scoreboard</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
 
     <repositories>
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>Plugin Metrics</id>
+            <url>http://repo.mcstats.org/content/repositories/public</url>
         </repository>
     </repositories>
     <build>
@@ -20,6 +24,12 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <finalName>${project.name}</finalName>
                 </configuration>
             </plugin>
         </plugins>
@@ -43,6 +53,12 @@
             <version>1.8.2</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/lib/HolographicDisplays.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.mcstats.bukkit</groupId>
+            <artifactId>metrics</artifactId>
+            <version>R8-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
