@@ -32,13 +32,16 @@ public class BufferedHandler implements InvocationHandler {
         if (method.getName().equals("sendMessage") || method.getName().equals("sendRawMessage")) {
             if (args.length == 1 && args[0] instanceof String) {
                 ps.println(args[0]);
+            } else if (args.length == 1 && args[0] != null && args[0].getClass().isArray() && args[0].getClass().getComponentType().isAssignableFrom(String.class)) {
+                for (String s : (String[]) args[0]) {
+                    ps.println(s);
+                }
             } else {
                 for (Object o : args) {
                     ps.println("" + o);
                 }
             }
             propertyChangeSupport.firePropertyChange("stdout", null, getStdout());
-            return null;
         }
         return method.invoke(proxee, args);
     }
