@@ -20,7 +20,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.ByteArrayOutputStream;
@@ -31,6 +30,7 @@ import java.util.*;
 
 /**
  * Stupid Proxy object, only needed until BufferedPlayerSender works again
+ *
  * @see dk.lockfuglsang.wolfencraft.util.BufferedPlayerSender
  */
 public class ProxyPlayer implements Player, BufferedSender {
@@ -169,7 +169,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isSneaking() {
-        return false;
+        return player.isSneaking();
     }
 
     @Override
@@ -178,7 +178,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isSprinting() {
-        return false;
+        return player.isSprinting();
     }
 
     @Override
@@ -201,7 +201,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isSleepingIgnored() {
-        return false;
+        return player.isSleepingIgnored();
     }
 
     @Override
@@ -264,7 +264,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean hasAchievement(Achievement achievement) {
-        return false;
+        return player.hasAchievement(achievement);
     }
 
     @Override
@@ -358,7 +358,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isPlayerTimeRelative() {
-        return false;
+        return player.isPlayerTimeRelative();
     }
 
     @Override
@@ -498,7 +498,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isOnGround() {
-        return false;
+        return player.isOnGround();
     }
 
     @Override
@@ -557,12 +557,12 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isDead() {
-        return false;
+        return player.isDead();
     }
 
     @Override
     public boolean isValid() {
-        return false;
+        return player.isValid();
     }
 
     @Override
@@ -582,7 +582,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return player.isEmpty();
     }
 
     @Override
@@ -615,7 +615,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isBanned() {
-        return false;
+        return player.isBanned();
     }
 
     @Override
@@ -624,7 +624,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isWhitelisted() {
-        return false;
+        return player.isWhitelisted();
     }
 
     @Override
@@ -671,7 +671,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isInsideVehicle() {
-        return false;
+        return player.isInsideVehicle();
     }
 
     @Override
@@ -686,7 +686,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isFlying() {
-        return false;
+        return player.isFlying();
     }
 
     @Override
@@ -730,7 +730,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isHealthScaled() {
-        return false;
+        return player.isHealthScaled();
     }
 
     @Override
@@ -753,7 +753,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isOnline() {
-        return false;
+        return player.isOnline();
     }
 
     @Override
@@ -825,7 +825,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isSleeping() {
-        return false;
+        return player.isSleeping();
     }
 
     @Override
@@ -844,7 +844,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isBlocking() {
-        return false;
+        return player.isBlocking();
     }
 
     @Override
@@ -973,7 +973,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean hasPotionEffect(PotionEffectType potionEffectType) {
-        return false;
+        return player.hasPotionEffect(potionEffectType);
     }
 
     @Override
@@ -987,7 +987,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean hasLineOfSight(Entity entity) {
-        return false;
+        return player.hasLineOfSight(entity);
     }
 
     @Override
@@ -1028,12 +1028,12 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isCustomNameVisible() {
-        return false;
+        return player.isCustomNameVisible();
     }
 
     @Override
     public boolean isLeashed() {
-        return false;
+        return player.isLeashed();
     }
 
     @Override
@@ -1123,22 +1123,22 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isPermissionSet(String s) {
-        return false;
+        return player.isPermissionSet(s);
     }
 
     @Override
     public boolean isPermissionSet(Permission permission) {
-        return false;
+        return player.isPermissionSet(permission);
     }
 
     @Override
     public boolean hasPermission(String s) {
-        return false;
+        return player.hasPermission(s);
     }
 
     @Override
     public boolean hasPermission(Permission permission) {
-        return false;
+        return player.hasPermission(permission);
     }
 
     @Override
@@ -1196,7 +1196,7 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public boolean isOp() {
-        return false;
+        return player.isOp();
     }
 
     @Override
