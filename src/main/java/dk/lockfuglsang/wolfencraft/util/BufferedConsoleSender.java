@@ -3,7 +3,6 @@ package dk.lockfuglsang.wolfencraft.util;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.Proxy;
 
 /**
@@ -28,13 +27,4 @@ public class BufferedConsoleSender implements BufferedSender {
         return proxy;
     }
 
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        handler.addPropertyChangeListener(listener);
-    }
-
-    @Override
-    public void clear() {
-        handler.clear();
-    }
 }

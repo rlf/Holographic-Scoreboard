@@ -5,7 +5,6 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.Proxy;
 
 /**
@@ -23,11 +22,6 @@ public class BufferedPlayerSender implements BufferedSender {
     }
 
     @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        handler.addPropertyChangeListener(listener);
-    }
-
-    @Override
     public String getStdout() {
         return handler.getStdout();
     }
@@ -35,11 +29,6 @@ public class BufferedPlayerSender implements BufferedSender {
     @Override
     public CommandSender getSender() {
         return proxy;
-    }
-
-    @Override
-    public void clear() {
-        handler.clear();
     }
 
 }

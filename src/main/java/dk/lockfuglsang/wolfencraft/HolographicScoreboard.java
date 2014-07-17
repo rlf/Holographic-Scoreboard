@@ -14,14 +14,12 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.map.MinecraftFont;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.mcstats.Metrics;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -107,7 +105,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         tasks.put(scoreboard.getId(), Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
-                scoreboard.refreshHologram(HolographicScoreboard.this);
+                scoreboard.refreshView(HolographicScoreboard.this);
             }
         }, 0, scoreboard.getRefreshTicks()));
         // TODO: Do stats
@@ -187,7 +185,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         Scoreboard scoreboard = getScoreboard(args[1]);
         if (scoreboard != null && sender instanceof Player) {
             scoreboard.setLocation(((Player)sender).getLocation());
-            scoreboard.refreshHologram(this);
+            scoreboard.refreshView(this);
             sender.sendMessage("§3Moved scoreboard §4" + args[1]);
             return true;
         }
@@ -253,7 +251,7 @@ public final class HolographicScoreboard extends JavaPlugin {
             } else {
                 Scoreboard scoreboard = getScoreboard(args[1]);
                 if (scoreboard != null) {
-                    scoreboard.refreshHologram(this);
+                    scoreboard.refreshView(this);
                     sender.sendMessage("§2Refreshed " + args[1]);
                     return true;
                 }
@@ -267,7 +265,7 @@ public final class HolographicScoreboard extends JavaPlugin {
 
     private boolean refreshAll(CommandSender sender) {
         for (Scoreboard scoreboard : scoreboards) {
-            scoreboard.refreshHologram(this);
+            scoreboard.refreshView(this);
         }
         sender.sendMessage("§2Refreshed all scoreboards!");
         return true;
@@ -317,7 +315,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         if (bukkitTask != null) {
             bukkitTask.cancel();
         }
-        scoreboard.removeHologram();
+        scoreboard.removeView();
         return scoreboards.remove(scoreboard);
     }
 

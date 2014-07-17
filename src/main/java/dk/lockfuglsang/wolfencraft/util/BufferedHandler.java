@@ -1,7 +1,5 @@
 package dk.lockfuglsang.wolfencraft.util;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -12,14 +10,12 @@ import java.lang.reflect.Method;
  * Generic Invocation Handler supporting interception of messages.
  */
 public class BufferedHandler implements InvocationHandler {
-    private final PropertyChangeSupport propertyChangeSupport;
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
     private PrintStream ps;
 
     private Object proxee;
     public BufferedHandler(Object proxee) {
         this.proxee = proxee;
-        this.propertyChangeSupport = new PropertyChangeSupport(this);
         try {
             ps = new PrintStream(baos, true, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -41,7 +37,7 @@ public class BufferedHandler implements InvocationHandler {
                     ps.println("" + o);
                 }
             }
-            propertyChangeSupport.firePropertyChange("stdout", null, getStdout());
+            return null;
         }
         return method.invoke(proxee, args);
     }
@@ -50,11 +46,4 @@ public class BufferedHandler implements InvocationHandler {
         return baos.toString();
     }
 
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    public void clear() {
-        baos.reset();
-    }
 }

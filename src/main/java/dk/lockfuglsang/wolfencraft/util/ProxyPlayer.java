@@ -20,8 +20,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -37,11 +35,9 @@ public class ProxyPlayer implements Player, BufferedSender {
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
     private PrintStream ps;
     private Player player;
-    private PropertyChangeSupport propertyChangeSupport;
 
     public ProxyPlayer(Player player) {
         this.player = player;
-        propertyChangeSupport = new PropertyChangeSupport(this);
         try {
             ps = new PrintStream(baos, true, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -60,19 +56,8 @@ public class ProxyPlayer implements Player, BufferedSender {
     }
 
     @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    @Override
-    public void clear() {
-        baos.reset();
-    }
-
-    @Override
     public void sendMessage(String s) {
         ps.println(s);
-        propertyChangeSupport.firePropertyChange("stdout", null, getStdout());
     }
 
     @Override
@@ -80,13 +65,11 @@ public class ProxyPlayer implements Player, BufferedSender {
         for (String s : strings) {
             ps.println(s);
         }
-        propertyChangeSupport.firePropertyChange("stdout", null, getStdout());
     }
 
     @Override
     public void sendRawMessage(String s) {
         ps.println(s);
-        propertyChangeSupport.firePropertyChange("stdout", null, getStdout());
     }
 
     // ------------------------------------------------------------------------
