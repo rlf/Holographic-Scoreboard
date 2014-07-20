@@ -102,10 +102,20 @@ public final class HolographicScoreboard extends JavaPlugin {
     }
 
     private void scheduleUpdater(final Scoreboard scoreboard) {
-        tasks.put(scoreboard.getId(), Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
+        final String scoreBoardId = scoreboard.getId();
+        tasks.put(scoreBoardId, Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
-                scoreboard.refreshView(HolographicScoreboard.this);
+                Scoreboard board = getScoreboard(scoreBoardId);
+                if (board != null) {
+                    board.refreshView(HolographicScoreboard.this);
+                } else {
+                    // TODO: Somehow cleanup?
+                    BukkitTask task = tasks.remove(scoreBoardId);
+                    if (task != null) {
+                        task.cancel();
+                    }
+                }
             }
         }, 0, scoreboard.getRefreshTicks()));
         // TODO: Do stats
@@ -311,12 +321,14 @@ public final class HolographicScoreboard extends JavaPlugin {
     }
 
     private boolean removeScoreboard(Scoreboard scoreboard) {
-        BukkitTask bukkitTask = tasks.remove(scoreboard.getId());
-        if (bukkitTask != null) {
-            bukkitTask.cancel();
+        synchronized (scoreboards) {
+            BukkitTask bukkitTask = tasks.remove(scoreboard.getId());
+            if (bukkitTask != null) {
+                bukkitTask.cancel();
+            }
+            scoreboard.removeView();
+            return scoreboards.remove(scoreboard);
         }
-        scoreboard.removeView();
-        return scoreboards.remove(scoreboard);
     }
 
     private Scoreboard getScoreboard(String scoreName) {
@@ -354,8 +366,8 @@ public final class HolographicScoreboard extends JavaPlugin {
         String id = args[1];
         String refresh = args[2];
         int interval = TimeUtil.getTimeAsTicks(refresh);
-        if (interval <= 0) {
-            sender.sendMessage("§4Invalid interval, must be <num>[h|m|s]");
+        if (interval < 200) {
+            sender.sendMessage("§4Invalid interval, must be <num>[h|m|s], and at least 10s");
             return false;
         }
         Scoreboard.Sender senderType = Scoreboard.Sender.CONSOLE;

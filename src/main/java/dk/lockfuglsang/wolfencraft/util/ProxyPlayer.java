@@ -47,7 +47,11 @@ public class ProxyPlayer implements Player, BufferedSender {
 
     @Override
     public String getStdout() {
-        return baos.toString();
+        try {
+            return baos.toString("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("WTH! Your operating system doesn't support UTF-8, get real!");
+        }
     }
 
     @Override
