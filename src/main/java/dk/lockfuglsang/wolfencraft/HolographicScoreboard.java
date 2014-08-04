@@ -5,12 +5,14 @@ import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import dk.lockfuglsang.wolfencraft.config.ConfigWriter;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
 import dk.lockfuglsang.wolfencraft.stats.CommandPlotter;
+import dk.lockfuglsang.wolfencraft.util.ResourceManager;
 import dk.lockfuglsang.wolfencraft.util.TimeUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -33,12 +35,12 @@ public final class HolographicScoreboard extends JavaPlugin {
     private Map<String, CommandPlotter> plotters = new HashMap<>();
     private Metrics metrics;
     private Metrics.Graph cmdGraph;
+    private final ResourceManager rm = ResourceManager.getRM();
 
     @Override
     public void onEnable() {
         if (!isDependenciesFulfilled()) {
-            getLogger().severe("*** HolographicDisplays and ProtocolLib is required! ***");
-            getLogger().severe("=> HolographicScoreboard will be disabled!!");
+            getLogger().severe(rm.format("log.missing.dependencies"));
             this.setEnabled(false);
             return;
         }
@@ -47,14 +49,14 @@ public final class HolographicScoreboard extends JavaPlugin {
             metrics = new Metrics(this);
             cmdGraph = metrics.createGraph("Commands");
             if (metrics.start()) {
-                getLogger().info("MCStats enabled for HolographicScoreboard");
+                getLogger().info(rm.format("log.mcstats.enabled"));
             } else {
                 getLogger().warning("MCStats was not enabled for HolographicScoreboard");
                 getLogger().info("- isOptOut ; " + metrics.isOptOut());
                 getLogger().info("- config : " + metrics.getConfigFile());
             }
         } catch (IOException e) {
-            getLogger().severe("Unable to stat plugin: " + e.getMessage());
+            getLogger().severe(rm.format("log.mcstats.failed", e.getMessage()));
         }
     }
 
@@ -89,11 +91,6 @@ public final class HolographicScoreboard extends JavaPlugin {
     private void loadScoreboards() {
         if (scoreboards != null) {
             removeAllBoards();
-        }
-        try {
-            getConfig().load("scoreboards.yml");
-        } catch (IOException | InvalidConfigurationException e) {
-            getLogger().info("No configuration found for Holographic Scoreboards!");
         }
         scoreboards.addAll(ConfigWriter.load(getConfig()));
         for (Scoreboard scoreboard : scoreboards) {
@@ -146,11 +143,7 @@ public final class HolographicScoreboard extends JavaPlugin {
     @Override
     public void saveConfig() {
         ConfigWriter.save(getConfig(), scoreboards);
-        try {
-            getConfig().save("scoreboards.yml");
-        } catch (IOException e) {
-            getLogger().severe("Unable to save configuration!");
-        }
+        super.saveConfig();
     }
 
     @java.lang.Override
@@ -172,16 +165,28 @@ public final class HolographicScoreboard extends JavaPlugin {
                     case "reload":
                         return reloadConfig(sender);
                     case "cleanup":
-                        sender.sendMessage("§3Cleaned " + removeAllHolograms() + " holograms!");
+                        sender.sendMessage(rm.format("msg.cleaned.holograms", removeAllHolograms()));
                         return true;
                     case "refresh":
                         return refreshScoreboards(sender, args);
                     case "move":
                         return moveScoreboard(sender, args);
+                    case "edit":
+                        return editScoreboard(sender, args);
                 }
             } else {
-                sender.sendMessage("§4You do not have permission to Holographic Scoreboards!");
+                sender.sendMessage(rm.format("error.noaccess"));
                 return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean editScoreboard(CommandSender sender, String[] args) {
+        if (args.length >= 2) {
+            Scoreboard scoreboard = getScoreboard(args[1]);
+            if (scoreboard != null) {
+
             }
         }
         return false;
@@ -193,13 +198,31 @@ public final class HolographicScoreboard extends JavaPlugin {
 
     private boolean moveScoreboard(CommandSender sender, String[] args) {
         Scoreboard scoreboard = getScoreboard(args[1]);
-        if (scoreboard != null && sender instanceof Player) {
-            scoreboard.setLocation(((Player)sender).getLocation());
+        if (scoreboard != null) {
+            Location location = null;
+            try {
+                if (args.length == 2 && sender instanceof Player) {
+                    location = ((Player) sender).getLocation();
+                } else if (args.length == 5 || args.length == 6) {
+                    double x = Double.parseDouble(args[2]);
+                    double y = Double.parseDouble(args[3]);
+                    double z = Double.parseDouble(args[4]);
+                    World world = (args.length == 6 ? Bukkit.getWorld(args[5]) : sender instanceof Player ? ((Player) sender).getWorld() : null);
+                    if (world == null) {
+                        throw new IllegalArgumentException("No valid world supplied!");
+                    }
+                    location = new Location(world, x, y, z);
+                }
+            } catch (IllegalArgumentException e) {
+                sender.sendMessage(rm.format("msg.usage.move"));
+                return true;
+            }
+            scoreboard.setLocation(location);
             scoreboard.refreshView(this);
-            sender.sendMessage("§3Moved scoreboard §4" + args[1]);
+            sender.sendMessage(rm.format("msg.scoreboard.moved", args[1], location.getX(), location.getY(), location.getZ(), location.getWorld().getName()));
             return true;
         }
-        sender.sendMessage("§4No valid scoreboard §2" + args[1] + "§4 found!");
+        sender.sendMessage(rm.format("error.scoreboard.notfound", args[1]));
         return false;
     }
 
@@ -215,6 +238,7 @@ public final class HolographicScoreboard extends JavaPlugin {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        // TODO: Refactor this to be "smarter"
         if (command.getName().equalsIgnoreCase(CMD_HGS)) {
             List<String> suggestions = new ArrayList<>();
             if (args.length == 1) {
@@ -223,7 +247,7 @@ public final class HolographicScoreboard extends JavaPlugin {
                 suggestions.addAll(getSuggestions(arg, Arrays.asList("list", "create", "remove", "info", "save", "reload", "cleanup", "refresh", "move")));
             } else if (args.length == 2) {
                 // Complete on 2nd level
-                if ("remove".equals(args[0]) || "move".equals(args[0])) {
+                if ("remove".equals(args[0]) || "move".equals(args[0]) || "edit".equals(args[0])) {
                     suggestions.addAll(getScoreboards(args[1]));
                 } else if ("refresh".equals(args[0])) {
                     suggestions.addAll(getScoreboards(args[1]));
@@ -231,7 +255,9 @@ public final class HolographicScoreboard extends JavaPlugin {
             } else if (args.length == 3) {
                 if ("create".equals(args[0])) {
                     // interval - we could suggest something here...
-                    getSuggestions(args[2].toLowerCase(), Arrays.asList("10s", "30s", "5m", "10m", "30m", "1h"));
+                    suggestions.addAll(getSuggestions(args[2].toLowerCase(), Arrays.asList("10s", "30s", "5m", "10m", "30m", "1h")));
+                } else if ("edit".equals(args[0])) {
+                    suggestions.addAll(Arrays.asList("location"));
                 }
             } else if (args.length == 4) {
                 if ("create".equals(args[0])) {
@@ -262,14 +288,16 @@ public final class HolographicScoreboard extends JavaPlugin {
                 Scoreboard scoreboard = getScoreboard(args[1]);
                 if (scoreboard != null) {
                     scoreboard.refreshView(this);
-                    sender.sendMessage("§2Refreshed " + args[1]);
+                    sender.sendMessage(rm.format("msg.scoreboard.refresh", args[1]));
                     return true;
+                } else {
+                    sender.sendMessage(rm.format("error.scoreboard.notfound", args[1]));
+                    return false;
                 }
             }
         } else if (args.length == 1) {
             return refreshAll(sender);
         }
-        sender.sendMessage("§4You have to provide a valid scoreboard-id!");
         return false;
     }
 
@@ -277,7 +305,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         for (Scoreboard scoreboard : scoreboards) {
             scoreboard.refreshView(this);
         }
-        sender.sendMessage("§2Refreshed all scoreboards!");
+        sender.sendMessage(rm.format("msg.scoreboard.refresh.all"));
         return true;
     }
 
@@ -291,29 +319,29 @@ public final class HolographicScoreboard extends JavaPlugin {
 
     private boolean reloadConfig(CommandSender sender) {
         reloadConfig();
-        sender.sendMessage("§3Configuration reloaded!");
+        sender.sendMessage(rm.format("msg.reload"));
         return true;
     }
 
     private boolean saveConfig(CommandSender sender) {
         saveConfig();
-        sender.sendMessage("§3Configuration saved!");
+        sender.sendMessage(rm.format("msg.saved"));
         return true;
     }
 
     private boolean removeScoreboard(CommandSender sender, String[] args) {
         if (args.length != 2) {
-            sender.sendMessage("§4Wrong number of arguments for remove!");
-            return false;
+            sender.sendMessage(rm.format("msg.usage.remove"));
+            return true;
         }
         String scoreName = args[1];
         Scoreboard scoreboard = getScoreboard(scoreName);
         if (scoreboard == null) {
-            sender.sendMessage("§4No scoreboard with id " + scoreName + " was found!");
+            sender.sendMessage(rm.format("error.scoreboard.notfound", scoreName));
             return false;
         }
         if (removeScoreboard(scoreboard)) {
-            sender.sendMessage("§2Scoreboard §3" + scoreName + "§2 was removed");
+            sender.sendMessage(rm.format("msg.scoreboard.removed", scoreName));
             saveConfig();
             return true;
         }
@@ -343,7 +371,7 @@ public final class HolographicScoreboard extends JavaPlugin {
     private boolean showList(CommandSender sender) {
         StringBuilder sb = new StringBuilder();
         if (scoreboards == null || scoreboards.isEmpty()) {
-            sb.append("§3No scoreboards located!");
+            sb.append(rm.format("msg.scoreboards.empty"));
         } else {
             YamlConfiguration config = new YamlConfiguration();
             ConfigWriter.save(config, scoreboards);
@@ -355,11 +383,11 @@ public final class HolographicScoreboard extends JavaPlugin {
 
     private boolean createScoreboard(CommandSender sender, String[] args) {
         if (args.length < 5) {
-            sender.sendMessage("§4Wrong number of arguments for create!");
-            return false;
+            sender.sendMessage(rm.format("msg.usage.create"));
+            return true;
         }
         if (!(sender instanceof Player)) {
-            sender.sendMessage("§4Only a player can create scoreboards!");
+            sender.sendMessage(rm.format("error.only.player"));
             return false;
         }
         Player player = (Player) sender;
@@ -367,14 +395,14 @@ public final class HolographicScoreboard extends JavaPlugin {
         String refresh = args[2];
         int interval = TimeUtil.getTimeAsTicks(refresh);
         if (interval < 200) {
-            sender.sendMessage("§4Invalid interval, must be <num>[h|m|s], and at least 10s");
+            sender.sendMessage(rm.format("error.wrong.interval"));
             return false;
         }
-        Scoreboard.Sender senderType = Scoreboard.Sender.CONSOLE;
+        Scoreboard.Sender senderType;
         try {
             senderType = Scoreboard.Sender.valueOf(args[3].toUpperCase());
         } catch (IllegalArgumentException ignored) {
-            sender.sendMessage("§4Invalid sender, only player or console is allowed!");
+            sender.sendMessage(rm.format("error.wrong.sender"));
             return false;
         }
         String cmd = args[4];
@@ -389,7 +417,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         scoreboards.add(scoreboard);
         YamlConfiguration config = new YamlConfiguration();
         ConfigWriter.save(config, scoreboard);
-        sender.sendMessage(("Created scoreboard: " + id + "\n" + config.saveToString()).split("\n"));
+        sender.sendMessage(rm.format("msg.scoreboard.created", id, config.saveToString()).split("\n"));
         scheduleUpdater(scoreboard);
         saveConfig();
         return true;

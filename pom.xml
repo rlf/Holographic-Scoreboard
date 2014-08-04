@@ -5,7 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.lockfuglsang.wolfencraft</groupId>
     <artifactId>holographic-scoreboard</artifactId>
-    <version>1.3.3</version>
+    <version>1.3.4</version>
+    <name>HolographicScoreboard</name>
 
     <repositories>
         <repository>

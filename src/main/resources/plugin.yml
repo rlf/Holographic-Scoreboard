@@ -11,6 +11,7 @@ commands:
       §3/<command> §6list §7- Lists all the current scoreboards
       §3/<command> §6create §2<id> <interval> <player|console> <cmd>
       §3/<command> §6move §2<id> §7- Moves the board to your current position.
+      §3/<command> §6move §2<id> <x> <y> <z> [world] §7- Moves the board to the supplied position
       §3/<command> §6remove §2<id>
       §3/<command> §6reload §7- Reloads configuration
       §3/<command> §6save §7- Saves configuration

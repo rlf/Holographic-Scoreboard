@@ -72,7 +72,7 @@ public class Scoreboard {
         cancelTask();
         final BufferedSender sender = createBufferedSender(plugin);
         if (sender == null || !Bukkit.dispatchCommand(sender.getSender(), command)) {
-            String output = "\u00a74Unable to execute \u00a73" + command;
+            String output = ResourceManager.getRM().format("error.cmd.unabletoexecute", command);
             updateView(plugin, output);
         } else {
             // TODO: Make this configurable
