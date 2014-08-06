@@ -103,7 +103,7 @@ public class Scoreboard {
         if (sender == Sender.CONSOLE) {
             return new BufferedConsoleSender(Bukkit.getConsoleSender());
         } else {
-            Player nearestPlayer = DistanceUtil.getNearestPlayer(location);
+            Player nearestPlayer = LocationUtil.getNearestPlayer(location);
             if (nearestPlayer == null) {
                 nearestPlayer = Bukkit.getOnlinePlayers().length > 0 ? Bukkit.getOnlinePlayers()[0] : null;
             }

@@ -5,6 +5,7 @@ import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import dk.lockfuglsang.wolfencraft.config.ConfigWriter;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
 import dk.lockfuglsang.wolfencraft.stats.CommandPlotter;
+import dk.lockfuglsang.wolfencraft.util.LocationUtil;
 import dk.lockfuglsang.wolfencraft.util.ResourceManager;
 import dk.lockfuglsang.wolfencraft.util.TimeUtil;
 import org.bukkit.Bukkit;
@@ -202,16 +203,12 @@ public final class HolographicScoreboard extends JavaPlugin {
             Location location = null;
             try {
                 if (args.length == 2 && sender instanceof Player) {
-                    location = ((Player) sender).getLocation();
-                } else if (args.length == 5 || args.length == 6) {
-                    double x = Double.parseDouble(args[2]);
-                    double y = Double.parseDouble(args[3]);
-                    double z = Double.parseDouble(args[4]);
-                    World world = (args.length == 6 ? Bukkit.getWorld(args[5]) : sender instanceof Player ? ((Player) sender).getWorld() : null);
-                    if (world == null) {
-                        throw new IllegalArgumentException("No valid world supplied!");
-                    }
-                    location = new Location(world, x, y, z);
+                    location = ((Player) sender).getEyeLocation();
+                } else if (args.length == 3) {
+                    location = LocationUtil.getLocation(args[2]);
+                }
+                if (location == null) {
+                    throw new IllegalArgumentException("No valid location was found");
                 }
             } catch (IllegalArgumentException e) {
                 sender.sendMessage(rm.format("msg.usage.move"));
@@ -386,11 +383,6 @@ public final class HolographicScoreboard extends JavaPlugin {
             sender.sendMessage(rm.format("msg.usage.create"));
             return true;
         }
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(rm.format("error.only.player"));
-            return false;
-        }
-        Player player = (Player) sender;
         String id = args[1];
         String refresh = args[2];
         int interval = TimeUtil.getTimeAsTicks(refresh);
@@ -405,15 +397,28 @@ public final class HolographicScoreboard extends JavaPlugin {
             sender.sendMessage(rm.format("error.wrong.sender"));
             return false;
         }
-        String cmd = args[4];
-        for (int i = 5; i < args.length; i++) {
+        int ix = 4;
+        Location location = LocationUtil.getLocation(args[ix]);
+        if (location == null) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(rm.format("msg.usage.create.console"));
+                return true;
+            } else {
+                Player player = (Player) sender;
+                location = player.getEyeLocation();
+            }
+        } else {
+            ix++;
+        }
+        String cmd = args[ix++];
+        for (int i = ix; i < args.length; i++) {
             cmd += " " + args[i];
         }
         Scoreboard scoreboard = getScoreboard(id);
         if (scoreboard != null) {
             removeScoreboard(scoreboard);
         }
-        scoreboard = new Scoreboard(id, refresh, senderType, cmd, player.getLocation());
+        scoreboard = new Scoreboard(id, refresh, senderType, cmd, location);
         scoreboards.add(scoreboard);
         YamlConfiguration config = new YamlConfiguration();
         ConfigWriter.save(config, scoreboard);
