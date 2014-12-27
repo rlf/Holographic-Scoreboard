@@ -37,6 +37,9 @@ public enum LocationUtil {
     }
 
     public static Player getNearestPlayer(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return null;
+        }
         double minDist = Double.MAX_VALUE;
         Player closest = null;
         String locationWorld = location.getWorld().getName();

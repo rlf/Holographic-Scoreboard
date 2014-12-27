@@ -1,7 +1,7 @@
 package dk.lockfuglsang.wolfencraft.view.hologram;
 
-import com.gmail.filoghost.holograms.api.Hologram;
-import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import dk.lockfuglsang.wolfencraft.view.View;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -67,7 +67,10 @@ public class HologramView implements View {
                     hologram.delete();
                     hologram = null;
                 }
-                hologram = HolographicDisplaysAPI.createHologram(plugin, location, lines);
+                hologram = HologramsAPI.createHologram(plugin, location);
+                for (String line : lines) {
+                    hologram.appendTextLine(line);
+                }
             }
             return null;
         }

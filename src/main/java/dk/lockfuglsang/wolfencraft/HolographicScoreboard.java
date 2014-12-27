@@ -1,7 +1,7 @@
 package dk.lockfuglsang.wolfencraft;
 
-import com.gmail.filoghost.holograms.api.Hologram;
-import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import dk.lockfuglsang.wolfencraft.config.ConfigWriter;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
 import dk.lockfuglsang.wolfencraft.stats.CommandPlotter;
@@ -80,7 +80,7 @@ public final class HolographicScoreboard extends JavaPlugin {
     }
 
     private boolean isDependenciesFulfilled() {
-        return Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays") && Bukkit.getPluginManager().isPluginEnabled("ProtocolLib");
+        return Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays");// && Bukkit.getPluginManager().isPluginEnabled("ProtocolLib");
     }
 
     @Override
@@ -307,11 +307,11 @@ public final class HolographicScoreboard extends JavaPlugin {
     }
 
     private int removeAllHolograms() {
-        Hologram[] holograms = HolographicDisplaysAPI.getHolograms(this);
+        Collection<Hologram> holograms = HologramsAPI.getHolograms(this);
         for (Hologram hologram : holograms) {
             hologram.delete();
         }
-        return holograms.length;
+        return holograms.size();
     }
 
     private boolean reloadConfig(CommandSender sender) {
