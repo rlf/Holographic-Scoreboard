@@ -10,7 +10,6 @@ import dk.lockfuglsang.wolfencraft.util.ResourceManager;
 import dk.lockfuglsang.wolfencraft.util.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -184,11 +183,41 @@ public final class HolographicScoreboard extends JavaPlugin {
     }
 
     private boolean editScoreboard(CommandSender sender, String[] args) {
-        if (args.length >= 2) {
-            Scoreboard scoreboard = getScoreboard(args[1]);
-            if (scoreboard != null) {
-
+        String scoreboardId = args.length > 1 ? args[1] : null;
+        String key = args.length > 2 ? args[2] : null;
+        String value = args.length > 3 ? args[3] : null;
+        if (args.length > 4) {
+            for (int i = 4; i < args.length; i++) {
+                value += " " + args[i];
             }
+        }
+        Scoreboard scoreboard = getScoreboard(scoreboardId);
+        if (scoreboard != null && key != null) {
+            if (key.equals("filter")) {
+                scoreboard.setFilter(value);
+            } else if (key.equals("location")) {
+                Location location = LocationUtil.getLocation(value);
+                if (location == null) {
+                    sender.sendMessage(rm.format("error.wrong.location"));
+                    return false;
+                } else {
+                    scoreboard.setLocation(location);
+                }
+            } else if (key.equals("delay") || key.equals("interval")) {
+                int time = TimeUtil.getTimeAsTicks(value);
+                if (time == 0) {
+                    sender.sendMessage(rm.format("error.wrong." + key));
+                    return false;
+                } else if (key.equals("delay")) {
+                    scoreboard.setDelay(value);
+                } else if (key.equals("interval")) {
+                    scoreboard.setInterval(value);
+                }
+            } else {
+                return false;
+            }
+            sender.sendMessage(rm.format("msg.scoreboard.edit", key, scoreboardId, value));
+            return true;
         }
         return false;
     }
@@ -241,7 +270,7 @@ public final class HolographicScoreboard extends JavaPlugin {
             if (args.length == 1) {
                 // Complete on the first-level commands
                 String arg = args[0].toLowerCase();
-                suggestions.addAll(getSuggestions(arg, Arrays.asList("list", "create", "remove", "info", "save", "reload", "cleanup", "refresh", "move")));
+                suggestions.addAll(getSuggestions(arg, Arrays.asList("list", "create", "remove", "info", "save", "reload", "cleanup", "refresh", "move", "edit")));
             } else if (args.length == 2) {
                 // Complete on 2nd level
                 if ("remove".equals(args[0]) || "move".equals(args[0]) || "edit".equals(args[0])) {
@@ -254,7 +283,7 @@ public final class HolographicScoreboard extends JavaPlugin {
                     // interval - we could suggest something here...
                     suggestions.addAll(getSuggestions(args[2].toLowerCase(), Arrays.asList("10s", "30s", "5m", "10m", "30m", "1h")));
                 } else if ("edit".equals(args[0])) {
-                    suggestions.addAll(Arrays.asList("location"));
+                    suggestions.addAll(Arrays.asList("filter", "delay", "interval", "location"));
                 }
             } else if (args.length == 4) {
                 if ("create".equals(args[0])) {

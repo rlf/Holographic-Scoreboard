@@ -25,6 +25,8 @@ public enum ConfigWriter {;
         config.set("command", scoreboard.getCommand());
         config.set("interval", scoreboard.getRefresh());
         config.set("sender", scoreboard.getSender().name().toLowerCase());
+        config.set("filter", scoreboard.getFilter());
+        config.set("delay", scoreboard.getDelay());
         save(config.createSection("location"), scoreboard.getLocation());
     }
 
@@ -53,7 +55,10 @@ public enum ConfigWriter {;
         String interval = section.getString("interval", "30m");
         String command = section.getString("command");
         Scoreboard.Sender senderType = Scoreboard.Sender.valueOf(section.getString("sender", "console").toUpperCase());
-        return new Scoreboard(id, interval, senderType, command, loadLocation(section.getConfigurationSection("location")));
+        Scoreboard scoreboard = new Scoreboard(id, interval, senderType, command, loadLocation(section.getConfigurationSection("location")));
+        scoreboard.setFilter(section.getString("filter", null));
+        scoreboard.setDelay(section.getString("delay", "5s"));
+        return scoreboard;
     }
 
     private static Location loadLocation(ConfigurationSection section) {

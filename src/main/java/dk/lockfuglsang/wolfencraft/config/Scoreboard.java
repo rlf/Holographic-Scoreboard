@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static dk.lockfuglsang.wolfencraft.util.TimeUtil.getTicksAsTime;
 
 /**
@@ -18,12 +21,14 @@ import static dk.lockfuglsang.wolfencraft.util.TimeUtil.getTicksAsTime;
 public class Scoreboard {
     public enum Sender { PLAYER, CONSOLE;}
     private String id;
-
     private String command;
+
     private Location location;
     private int refreshTicks;
     private int delayTicks;
     private Sender sender;
+    private String filter;
+    private Pattern pattern;
 
     private volatile View view;
     private volatile BukkitTask pendingTask;
@@ -48,9 +53,33 @@ public class Scoreboard {
     public String getRefresh() {
         return getTicksAsTime(refreshTicks);
     }
+    public String getDelay() {
+        return getTicksAsTime(delayTicks);
+    }
 
     public String getCommand() {
         return command;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
+        if (filter != null) {
+            pattern = Pattern.compile(filter);
+        } else {
+            pattern = null;
+        }
+    }
+
+    public void setDelay(String time) {
+        delayTicks = TimeUtil.getTimeAsTicks(time);
+    }
+
+    public void setInterval(String time) {
+        refreshTicks = TimeUtil.getTimeAsTicks(time);
     }
 
     public void setLocation(Location location) {
@@ -87,7 +116,12 @@ public class Scoreboard {
     }
 
     private void updateView(final Plugin plugin, String output) {
-        getView().updateView(plugin, output);
+        String filtered = output;
+        if (pattern != null && output != null) {
+            Matcher m = pattern.matcher(output);
+            filtered = m.replaceAll(""); // Filter the stuff out.
+        }
+        getView().updateView(plugin, filtered);
     }
 
     private View getView() {
