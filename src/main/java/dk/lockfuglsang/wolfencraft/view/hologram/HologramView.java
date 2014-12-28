@@ -2,6 +2,7 @@ package dk.lockfuglsang.wolfencraft.view.hologram;
 
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import dk.lockfuglsang.wolfencraft.util.StringUtil;
 import dk.lockfuglsang.wolfencraft.view.View;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -69,7 +70,9 @@ public class HologramView implements View {
                 }
                 hologram = HologramsAPI.createHologram(plugin, location);
                 for (String line : lines) {
-                    hologram.appendTextLine(line);
+                    if (line != null && !StringUtil.stripFormatting(line.trim()).isEmpty()) {
+                        hologram.appendTextLine(line);
+                    }
                 }
             }
             return null;
