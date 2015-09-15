@@ -1,7 +1,5 @@
 package dk.lockfuglsang.wolfencraft;
 
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import dk.lockfuglsang.wolfencraft.config.ConfigWriter;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
 import dk.lockfuglsang.wolfencraft.stats.CommandPlotter;
@@ -64,7 +62,6 @@ public final class HolographicScoreboard extends JavaPlugin {
     public void onDisable() {
         saveConfig();
         removeAllBoards();
-        removeAllHolograms();
         super.onDisable();
     }
 
@@ -79,7 +76,7 @@ public final class HolographicScoreboard extends JavaPlugin {
     }
 
     private boolean isDependenciesFulfilled() {
-        return Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays");// && Bukkit.getPluginManager().isPluginEnabled("ProtocolLib");
+        return Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays") || Bukkit.getPluginManager().isPluginEnabled("Holograms");
     }
 
     @Override
@@ -164,9 +161,6 @@ public final class HolographicScoreboard extends JavaPlugin {
                         return saveConfig(sender);
                     case "reload":
                         return reloadConfig(sender);
-                    case "cleanup":
-                        sender.sendMessage(rm.format("msg.cleaned.holograms", removeAllHolograms()));
-                        return true;
                     case "refresh":
                         return refreshScoreboards(sender, args);
                     case "move":
@@ -333,14 +327,6 @@ public final class HolographicScoreboard extends JavaPlugin {
         }
         sender.sendMessage(rm.format("msg.scoreboard.refresh.all"));
         return true;
-    }
-
-    private int removeAllHolograms() {
-        Collection<Hologram> holograms = HologramsAPI.getHolograms(this);
-        for (Hologram hologram : holograms) {
-            hologram.delete();
-        }
-        return holograms.size();
     }
 
     private boolean reloadConfig(CommandSender sender) {

@@ -2,7 +2,8 @@ package dk.lockfuglsang.wolfencraft.config;
 
 import dk.lockfuglsang.wolfencraft.util.*;
 import dk.lockfuglsang.wolfencraft.view.View;
-import dk.lockfuglsang.wolfencraft.view.hologram.HologramView;
+import dk.lockfuglsang.wolfencraft.view.hologram.HolographicDisplaysView;
+import dk.lockfuglsang.wolfencraft.view.hologram.ViewFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -126,7 +127,7 @@ public class Scoreboard {
 
     private View getView() {
         if (view == null) {
-            view = new HologramView();
+            view = ViewFactory.createView(id);
             view.setLocation(location);
         }
         return view;

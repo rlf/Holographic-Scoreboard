@@ -3,7 +3,6 @@ package dk.lockfuglsang.wolfencraft.view.hologram;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import dk.lockfuglsang.wolfencraft.util.StringUtil;
-import dk.lockfuglsang.wolfencraft.view.View;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -11,28 +10,15 @@ import org.bukkit.plugin.Plugin;
 import java.util.concurrent.Callable;
 
 /**
- * TODO: Rasmus javadoc
+ * View for HolographicDisplays
  */
-public class HologramView implements View {
-    private Location location;
+public class HolographicDisplaysView extends AbstractView {
     private volatile Hologram hologram;
 
     @Override
     public void updateView(Plugin plugin, String output) {
-        output = output.trim().replaceAll("\r", "");
         final String[] lines = getLines(output);
         Bukkit.getScheduler().callSyncMethod(plugin, new SyncCallable(plugin, lines));
-    }
-
-    private String[] getLines(String output) {
-        String[] lines = output.split("\n");
-        //return StringUtil.alignLeft2(lines);
-        return lines;
-    }
-
-    @Override
-    public void setLocation(Location location) {
-        this.location = location;
     }
 
     @Override
@@ -62,7 +48,7 @@ public class HologramView implements View {
 
         @Override
         public Void call() throws Exception {
-            synchronized (HologramView.this) {
+            synchronized (HolographicDisplaysView.this) {
                 if (hologram != null) {
                     hologram.clearLines();
                     hologram.delete();

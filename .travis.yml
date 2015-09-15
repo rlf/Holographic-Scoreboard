@@ -1,0 +1,21 @@
+language: java
+sudo: false
+env:
+  global:
+    secure: dGzZ9hl0ezUCYs72+Z4LUgtny0qsUn3HibpBKo4hriRPMY8EQqaJfi1ZDQTKr3ctjJMtQtcgnlC0BujEV+1W2tObjSJsCAdEbzKYZijwRXSK5jT1sua3EQScKYelpv0z4fd9LIYJJ95xwXMNMmAFSjdu3fRDkxtGgIIKbka8YiE=
+notifications:
+  email: false
+script:
+  - mvn -DskipTests=true install
+deploy:
+  provider: releases
+  api-key: ${GITHUB_TOKEN}
+  file:
+  - target/HolographicScoreboardjar
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
+cache:
+  directories:
+  - $HOME/.m2

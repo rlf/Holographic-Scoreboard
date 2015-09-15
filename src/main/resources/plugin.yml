@@ -2,7 +2,7 @@ name: HolographicScoreboard
 main: dk.lockfuglsang.wolfencraft.HolographicScoreboard
 author: R4zorax
 version: ${project.version}
-softdepend: [HolographicDisplays, ProtocolLib]
+softdepend: [HolographicDisplays, ProtocolLib, Holograms]
 commands:
   holographicscoreboard:
     description: §2Holographic Scoreboard §3v${project.version} §fby §4R4zorax

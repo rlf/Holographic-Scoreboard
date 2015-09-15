@@ -7,6 +7,10 @@ import org.bukkit.plugin.Plugin;
  * The Scoreboard view
  */
 public interface View {
+    /** Sets the view id */
+    void setId(String id);
+
+    String getId();
     /**
      * Updates the view to display the output supplied.
      * @param plugin The current plugin
