@@ -1,0 +1,6 @@
+# How long time after the plugin has been enabled (during startup) should it start
+# refreshing scoreboards?
+delayAfterEnable: 30s
+
+# Do not touch the version
+version: 1

@@ -3,6 +3,7 @@ main: dk.lockfuglsang.wolfencraft.HolographicScoreboard
 author: R4zorax
 version: ${project.version}
 softdepend: [HolographicDisplays, ProtocolLib, Holograms]
+load: POSTWORLD
 commands:
   holographicscoreboard:
     description: §2Holographic Scoreboard §3v${project.version} §fby §4R4zorax
@@ -15,7 +16,6 @@ commands:
       §3/<command> §6remove §2<id>
       §3/<command> §6reload §7- Reloads configuration
       §3/<command> §6save §7- Saves configuration
-      §3/<command> §6cleanup §7- Removes all holograms
       §3/<command> §6refresh §2[id] §7- Refreshes scoreboards now
     aliases: hgs
 

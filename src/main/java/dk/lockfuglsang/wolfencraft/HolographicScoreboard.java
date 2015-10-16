@@ -42,7 +42,6 @@ public final class HolographicScoreboard extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
-        loadScoreboards();
         try {
             metrics = new Metrics(this);
             cmdGraph = metrics.createGraph("Commands");
@@ -56,6 +55,12 @@ public final class HolographicScoreboard extends JavaPlugin {
         } catch (IOException e) {
             getLogger().severe(rm.format("log.mcstats.failed", e.getMessage()));
         }
+        Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+            @Override
+            public void run() {
+                loadScoreboards();
+            }
+        }, TimeUtil.getTimeAsTicks(getConfig().getString("delayAfterEnable", "30s")));
     }
 
     @Override
@@ -90,6 +95,10 @@ public final class HolographicScoreboard extends JavaPlugin {
             removeAllBoards();
         }
         scoreboards.addAll(ConfigWriter.load(getConfig()));
+        scheduleAll();
+    }
+
+    private void scheduleAll() {
         for (Scoreboard scoreboard : scoreboards) {
             scheduleUpdater(scoreboard);
         }
@@ -97,7 +106,7 @@ public final class HolographicScoreboard extends JavaPlugin {
 
     private void scheduleUpdater(final Scoreboard scoreboard) {
         final String scoreBoardId = scoreboard.getId();
-        tasks.put(scoreBoardId, Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
+        BukkitTask oldTask = tasks.put(scoreBoardId, Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
                 Scoreboard board = getScoreboard(scoreBoardId);
@@ -112,7 +121,9 @@ public final class HolographicScoreboard extends JavaPlugin {
                 }
             }
         }, 0, scoreboard.getRefreshTicks()));
-        // TODO: Do stats
+        if (oldTask != null) {
+            oldTask.cancel();
+        }
         getPlotter(scoreboard.getCommand()).inc();
     }
 
@@ -268,7 +279,7 @@ public final class HolographicScoreboard extends JavaPlugin {
             if (args.length == 1) {
                 // Complete on the first-level commands
                 String arg = args[0].toLowerCase();
-                suggestions.addAll(getSuggestions(arg, Arrays.asList("list", "create", "remove", "info", "save", "reload", "cleanup", "refresh", "move", "edit")));
+                suggestions.addAll(getSuggestions(arg, Arrays.asList("list", "create", "remove", "info", "save", "reload", "refresh", "move", "edit")));
             } else if (args.length == 2) {
                 // Complete on 2nd level
                 if ("remove".equals(args[0]) || "move".equals(args[0]) || "edit".equals(args[0])) {
