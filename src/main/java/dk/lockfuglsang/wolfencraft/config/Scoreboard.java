@@ -10,6 +10,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,8 +30,9 @@ public class Scoreboard {
     private int refreshTicks;
     private int delayTicks;
     private Sender sender;
-    private String filter;
-    private Pattern pattern;
+    private List<String> filter;
+    private List<Pattern> pattern;
+    private List<String> replacement;
 
     private volatile View view;
     private volatile BukkitTask pendingTask;
@@ -62,17 +65,30 @@ public class Scoreboard {
         return command;
     }
 
-    public String getFilter() {
+    public List<String> getFilter() {
         return filter;
     }
 
-    public void setFilter(String filter) {
+    public void setFilter(List<String> filter) {
         this.filter = filter;
-        if (filter != null) {
-            pattern = Pattern.compile(filter);
-        } else {
-            pattern = null;
+        pattern = new ArrayList<>();
+        replacement = new ArrayList<>();
+        for (String f : filter) {
+            String[] parts = f.split("=");
+            pattern.add(Pattern.compile(parts[0]));
+            if (parts.length == 2) {
+                replacement.add(parts[1]);
+            } else {
+                replacement.add("");
+            }
         }
+    }
+    public void setFilter(String filter) {
+        List<String> list = new ArrayList<>();
+        if (filter != null) {
+            list.add(filter);
+        }
+        setFilter(list);
     }
 
     public void setDelay(String time) {
@@ -119,8 +135,10 @@ public class Scoreboard {
     private void updateView(final Plugin plugin, String output) {
         String filtered = output;
         if (pattern != null && output != null) {
-            Matcher m = pattern.matcher(output);
-            filtered = m.replaceAll(""); // Filter the stuff out.
+            for (int i = 0; i < pattern.size(); i++) {
+                Matcher m = pattern.get(i).matcher(filtered);
+                filtered = m.replaceAll(replacement.get(i));
+            }
         }
         getView().updateView(plugin, filtered);
     }

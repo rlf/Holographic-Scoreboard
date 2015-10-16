@@ -189,6 +189,10 @@ public final class HolographicScoreboard extends JavaPlugin {
         if (scoreboard != null && key != null) {
             if (key.equals("filter")) {
                 scoreboard.setFilter(value);
+            } else if (key.equals("addfilter")) {
+                List<String> filter = scoreboard.getFilter();
+                filter.add(value);
+                scoreboard.setFilter(filter);
             } else if (key.equals("location")) {
                 Location location = LocationUtil.getLocation(value);
                 if (location == null) {

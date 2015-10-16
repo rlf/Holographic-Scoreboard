@@ -56,7 +56,16 @@ public enum ConfigWriter {;
         String command = section.getString("command");
         Scoreboard.Sender senderType = Scoreboard.Sender.valueOf(section.getString("sender", "console").toUpperCase());
         Scoreboard scoreboard = new Scoreboard(id, interval, senderType, command, loadLocation(section.getConfigurationSection("location")));
-        scoreboard.setFilter(section.getString("filter", null));
+        List<String> filter = new ArrayList<>();
+        if (section.isList("filter")) {
+            filter.addAll(section.getStringList("filter"));
+        } else {
+            String filterString = section.getString("filter", null);
+            if (filterString != null) {
+                filter.add(filterString);
+            }
+        }
+        scoreboard.setFilter(filter);
         scoreboard.setDelay(section.getString("delay", "5s"));
         return scoreboard;
     }
