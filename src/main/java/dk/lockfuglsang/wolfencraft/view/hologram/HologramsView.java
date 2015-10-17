@@ -2,6 +2,7 @@ package dk.lockfuglsang.wolfencraft.view.hologram;
 
 import com.sainttx.holograms.data.Hologram;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 
 import java.util.concurrent.Callable;
@@ -21,6 +22,14 @@ public class HologramsView extends AbstractView {
     public void removeView() {
         if (hologram != null) {
             hologram.delete();
+        }
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        super.setLocation(location);
+        if (hologram != null) {
+            hologram.teleport(location);
         }
     }
 
