@@ -158,12 +158,11 @@ public class Scoreboard {
         } else {
             Player nearestPlayer = LocationUtil.getNearestPlayer(location);
             if (nearestPlayer == null) {
-                nearestPlayer = Bukkit.getOnlinePlayers().length > 0 ? Bukkit.getOnlinePlayers()[0] : null;
+                nearestPlayer = !Bukkit.getOnlinePlayers().isEmpty() ? Bukkit.getOnlinePlayers().iterator().next() : null;
             }
             if (nearestPlayer != null) {
                 // TODO: This would be "the best" solution currently, but not possible atm (1.7.9).
-                //bufferedSender = new BufferedPlayerSender(nearestPlayer);
-                return new ProxyPlayer(nearestPlayer);
+                return new BufferedPlayerSender(nearestPlayer);
             }
         }
         return null;

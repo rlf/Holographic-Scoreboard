@@ -1,6 +1,6 @@
 package dk.lockfuglsang.wolfencraft.view.hologram;
 
-import com.sainttx.holograms.data.Hologram;
+import com.sainttx.holograms.api.Hologram;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -15,13 +15,13 @@ public class HologramsView extends AbstractView {
 
     @Override
     public void updateView(Plugin plugin, String output) {
-        Bukkit.getScheduler().callSyncMethod(plugin, new SyncCallable(plugin, getLines(output)));
+        Bukkit.getScheduler().callSyncMethod(plugin, new SyncCallable(getLines(output)));
     }
 
     @Override
     public void removeView() {
         if (hologram != null) {
-            hologram.delete();
+            hologram.despawn();
         }
     }
 
@@ -34,25 +34,19 @@ public class HologramsView extends AbstractView {
     }
 
     private class SyncCallable implements Callable<Void> {
-        private final Plugin plugin;
         private final String[] lines;
 
-        public SyncCallable(Plugin plugin, String[] lines) {
-            this.plugin = plugin;
+        public SyncCallable(String[] lines) {
             this.lines = lines;
         }
 
         @Override
         public Void call() throws Exception {
-            if (hologram == null) {
-                hologram = new Hologram(getId(), location, false, lines);
-            } else {
-                hologram.clearLines();
-                for (String line : lines) {
-                    hologram.addLine(line);
-                }
+            if (hologram != null) {
+                hologram.despawn();
             }
-            hologram.refreshAll();
+            hologram = new Hologram(getId(), location, false, lines);
+            hologram.refresh();
             return null;
         }
     }
