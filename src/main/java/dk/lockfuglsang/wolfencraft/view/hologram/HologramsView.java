@@ -1,6 +1,7 @@
 package dk.lockfuglsang.wolfencraft.view.hologram;
 
 import com.sainttx.holograms.api.Hologram;
+import com.sainttx.holograms.api.line.TextLine;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -45,8 +46,11 @@ public class HologramsView extends AbstractView {
             if (hologram != null) {
                 hologram.despawn();
             }
-            hologram = new Hologram(getId(), location, false, lines);
-            hologram.refresh();
+            hologram = new Hologram(getId(), location, false);
+            for (String line : lines) {
+                hologram.addLine(new TextLine(hologram, line));
+            }
+            hologram.spawn();
             return null;
         }
     }
