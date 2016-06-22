@@ -4,6 +4,8 @@ import dk.lockfuglsang.minecraft.command.AbstractCommandExecutor;
 import dk.lockfuglsang.minecraft.command.completion.AbstractTabCompleter;
 import dk.lockfuglsang.wolfencraft.HolographicScoreboard;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
+import dk.lockfuglsang.wolfencraft.util.ResourceManager;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -15,8 +17,11 @@ import java.util.List;
  * Commands from the uSkyBlock common bukkit utils
  */
 public class HGSCommand extends AbstractCommandExecutor {
+    private final HolographicScoreboard plugin;
+
     public HGSCommand(final HolographicScoreboard plugin) {
         super("hgs", "holographicscoreboard.admin", "main hgs command");
+        this.plugin = plugin;
         addTab("id", new AbstractTabCompleter() {
             @Override
             protected List<String> getTabList(CommandSender commandSender, String s) {
@@ -49,5 +54,16 @@ public class HGSCommand extends AbstractCommandExecutor {
         add(new SaveCommand(plugin));
         add(new ReloadCommand(plugin));
         add(new EditCommand(plugin));
+    }
+
+    @Override
+    public boolean onCommand(CommandSender commandSender, Command command, String alias, String[] args) {
+        if (!plugin.isDependenciesFulfilled()) {
+            if (commandSender.hasPermission(getPermission())) {
+                commandSender.sendMessage(ResourceManager.getRM().format("log.missing.dependencies").split("\n"));
+            }
+            return true;
+        }
+        return super.onCommand(commandSender, command, alias, args);
     }
 }

@@ -35,12 +35,11 @@ public final class HolographicScoreboard extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        getCommand("holographicscoreboard").setExecutor(new HGSCommand(this));
         if (!isDependenciesFulfilled()) {
             getLogger().severe(rm.format("log.missing.dependencies"));
-            this.setEnabled(false);
             return;
         }
-        getCommand("holographicscoreboard").setExecutor(new HGSCommand(this));
         try {
             metrics = new Metrics(this);
             cmdGraph = metrics.createGraph("Commands");
@@ -79,7 +78,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         }
     }
 
-    private boolean isDependenciesFulfilled() {
+    public boolean isDependenciesFulfilled() {
         return Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays") || Bukkit.getPluginManager().isPluginEnabled("Holograms");
     }
 

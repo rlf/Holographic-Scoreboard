@@ -161,7 +161,6 @@ public class Scoreboard {
                 nearestPlayer = !Bukkit.getOnlinePlayers().isEmpty() ? Bukkit.getOnlinePlayers().iterator().next() : null;
             }
             if (nearestPlayer != null) {
-                // TODO: This would be "the best" solution currently, but not possible atm (1.7.9).
                 return new BufferedPlayerSender(nearestPlayer);
             }
         }
