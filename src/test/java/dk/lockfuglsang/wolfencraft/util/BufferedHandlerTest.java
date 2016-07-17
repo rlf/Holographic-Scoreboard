@@ -1,5 +1,6 @@
 package dk.lockfuglsang.wolfencraft.util;
 
+import dk.lockfuglsang.wolfencraft.intercept.BufferedConsoleSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.junit.Test;
 

@@ -1,8 +1,13 @@
 package dk.lockfuglsang.wolfencraft.config;
 
-import dk.lockfuglsang.wolfencraft.util.*;
+import dk.lockfuglsang.wolfencraft.HolographicScoreboard;
+import dk.lockfuglsang.wolfencraft.intercept.BufferedConsoleSender;
+import dk.lockfuglsang.wolfencraft.intercept.BufferedPlayerSender;
+import dk.lockfuglsang.wolfencraft.intercept.BufferedSender;
+import dk.lockfuglsang.wolfencraft.util.LocationUtil;
+import dk.lockfuglsang.wolfencraft.util.ResourceManager;
+import dk.lockfuglsang.wolfencraft.util.TimeUtil;
 import dk.lockfuglsang.wolfencraft.view.View;
-import dk.lockfuglsang.wolfencraft.view.hologram.HolographicDisplaysView;
 import dk.lockfuglsang.wolfencraft.view.hologram.ViewFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -12,9 +17,13 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static dk.lockfuglsang.minecraft.reflection.ReflectionUtil.*;
 import static dk.lockfuglsang.wolfencraft.util.TimeUtil.getTicksAsTime;
 
 /**
@@ -22,6 +31,7 @@ import static dk.lockfuglsang.wolfencraft.util.TimeUtil.getTicksAsTime;
  * TODO: A bit too much business logic in here... perhaps...
  */
 public class Scoreboard {
+    private static final Logger log = Logger.getLogger(Scoreboard.class.getName());
     public enum Sender { PLAYER, CONSOLE;}
     private String id;
     private String command;
@@ -156,10 +166,7 @@ public class Scoreboard {
         if (sender == Sender.CONSOLE) {
             return new BufferedConsoleSender(Bukkit.getConsoleSender());
         } else {
-            Player nearestPlayer = LocationUtil.getNearestPlayer(location);
-            if (nearestPlayer == null) {
-                nearestPlayer = !Bukkit.getOnlinePlayers().isEmpty() ? Bukkit.getOnlinePlayers().iterator().next() : null;
-            }
+            Player nearestPlayer = HolographicScoreboard.interceptor.createDummyPlayer(id, location);
             if (nearestPlayer != null) {
                 return new BufferedPlayerSender(nearestPlayer);
             }

@@ -3,6 +3,7 @@ package dk.lockfuglsang.wolfencraft;
 import dk.lockfuglsang.wolfencraft.commands.HGSCommand;
 import dk.lockfuglsang.wolfencraft.config.ConfigWriter;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
+import dk.lockfuglsang.wolfencraft.intercept.PacketInterceptor;
 import dk.lockfuglsang.wolfencraft.stats.CommandPlotter;
 import dk.lockfuglsang.wolfencraft.util.ResourceManager;
 import dk.lockfuglsang.wolfencraft.util.TimeUtil;
@@ -32,6 +33,7 @@ public final class HolographicScoreboard extends JavaPlugin {
     private Metrics metrics;
     private Metrics.Graph cmdGraph;
     private final ResourceManager rm = ResourceManager.getRM();
+    public static PacketInterceptor interceptor;
 
     @Override
     public void onEnable() {
@@ -53,6 +55,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         } catch (IOException e) {
             getLogger().severe(rm.format("log.mcstats.failed", e.getMessage()));
         }
+        interceptor = new PacketInterceptor(this);
         Bukkit.getScheduler().runTaskLater(this, new Runnable() {
             @Override
             public void run() {
@@ -79,7 +82,9 @@ public final class HolographicScoreboard extends JavaPlugin {
     }
 
     public boolean isDependenciesFulfilled() {
-        return Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays") || Bukkit.getPluginManager().isPluginEnabled("Holograms");
+        return Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")
+               && (Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")
+                || Bukkit.getPluginManager().isPluginEnabled("Holograms"));
     }
 
     @Override

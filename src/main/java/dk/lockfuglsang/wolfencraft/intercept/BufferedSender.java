@@ -1,4 +1,4 @@
-package dk.lockfuglsang.wolfencraft.util;
+package dk.lockfuglsang.wolfencraft.intercept;
 
 import org.bukkit.command.CommandSender;
 
