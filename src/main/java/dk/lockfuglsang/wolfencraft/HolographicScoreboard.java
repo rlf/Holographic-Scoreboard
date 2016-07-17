@@ -55,7 +55,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         } catch (IOException e) {
             getLogger().severe(rm.format("log.mcstats.failed", e.getMessage()));
         }
-        interceptor = new PacketInterceptor(this);
+        interceptor = new PacketInterceptor();
         Bukkit.getScheduler().runTaskLater(this, new Runnable() {
             @Override
             public void run() {
@@ -69,6 +69,7 @@ public final class HolographicScoreboard extends JavaPlugin {
         saveConfig();
         removeAllBoards();
         super.onDisable();
+        PacketInterceptor.shutdown();
     }
 
     private void removeAllBoards() {

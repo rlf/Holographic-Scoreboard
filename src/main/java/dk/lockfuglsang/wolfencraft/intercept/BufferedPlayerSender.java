@@ -22,7 +22,7 @@ public class BufferedPlayerSender implements BufferedSender {
     }
 
     private void interceptPlayerConnection(Player player) {
-        HolographicScoreboard.interceptor.intercept(player, 20, baos);
+        HolographicScoreboard.interceptor.intercept(player, baos);
     }
 
     @Override

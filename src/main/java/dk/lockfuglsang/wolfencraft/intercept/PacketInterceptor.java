@@ -1,14 +1,7 @@
 package dk.lockfuglsang.wolfencraft.intercept;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import dk.lockfuglsang.minecraft.util.JSONUtil;
-import dk.lockfuglsang.wolfencraft.HolographicScoreboard;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -20,7 +13,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,30 +28,10 @@ public class PacketInterceptor {
     private static final Map<String, Player> dummies = new ConcurrentHashMap<>();
     private volatile static List<Object> players = null;
 
-    public PacketInterceptor(HolographicScoreboard plugin) {
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin,
-                PacketType.Play.Server.CHAT) {
-            @Override
-            public void onPacketSending(PacketEvent event) {
-                ByteArrayOutputStream baos = interceptMap.get(event.getPlayer().getUniqueId());
-                if (baos != null) {
-                    PacketContainer packet = event.getPacket();
-                    StructureModifier<WrappedChatComponent> chatComponents = packet.getChatComponents();
-                    for (int i = 0; i < chatComponents.size(); i++) {
-                        WrappedChatComponent chatComponent = chatComponents.read(i);
-                        try {
-                            baos.write((JSONUtil.json2String(chatComponent.getJson()) + "\n").getBytes("UTF-8"));
-                        } catch (IOException e) {
-                            // Ignore
-                        }
-                    }
-                    event.setCancelled(true);
-                }
-            }
-        });
+    public PacketInterceptor() {
     }
 
-    public void intercept(Player player, int ms, ByteArrayOutputStream baos) {
+    public void intercept(Player player, ByteArrayOutputStream baos) {
         interceptMap.put(player.getUniqueId(), baos);
         players.add(exec(player, "getHandle"));
     }
@@ -79,7 +51,7 @@ public class PacketInterceptor {
             Object worldServer = exec(minecraftServer, "getWorldServer", new Class[]{Integer.TYPE}, 0);
             final UUID uuid = UUID.randomUUID();
             Object gameProfile = newInstance("com.mojang.authlib.GameProfile", new Class[]{UUID.class, String.class},
-                    uuid, "HGS-" + id);
+                    uuid, "\u00a7kHGS-" + id);
             Object playerInteractManager = newInstance(nms() + ".PlayerInteractManager",
                     new Class[]{Class.forName(nms() + ".World")}, worldServer);
             Object entityPlayer = newInstance(nms() + ".EntityPlayer",
@@ -100,7 +72,7 @@ public class PacketInterceptor {
             }) {
                 @Override
                 public ChannelFuture writeAndFlush(Object msg) {
-                    if (msg != null && interceptMap.containsKey(uuid) && msg.getClass().getSimpleName().equals("PacketPlayOutChat")) {
+                    if (msg != null && interceptMap.containsKey(uuid)) {
                         interceptPacket(uuid, msg);
                     }
                     return super.writeAndFlush(msg);
@@ -113,7 +85,10 @@ public class PacketInterceptor {
             if (playerList != null && players == null) {
                 players = (List) getField(playerList, "players");
             }
-            exec(playerList, "a", networkManager, entityPlayer);
+            // New instance will assign the connection to the entityPlayer
+            newInstance(nms() + ".PlayerConnection", new Class[]{
+                            Class.forName(nms() + ".MinecraftServer"), networkManager.getClass(), entityPlayer.getClass()},
+                    minecraftServer, networkManager, entityPlayer);
 
             Object craftPlayer = newInstance(cb() + ".entity.CraftPlayer", new Class[]{
                     Class.forName(cb() + ".CraftServer"),
@@ -122,8 +97,7 @@ public class PacketInterceptor {
             player.setGameMode(GameMode.SPECTATOR);
             player.setDisplayName("\u00a7k");
             player.setPlayerListName("\u00a7k");
-            player.teleport(location);
-            exec(playerList, "disconnect", entityPlayer);
+            player.setOp(true);
             dummies.put(id, player);
             return player;
         } catch (Exception e) {
@@ -134,6 +108,13 @@ public class PacketInterceptor {
 
     private void interceptPacket(UUID uuid, Object msg) {
         ByteArrayOutputStream baos = interceptMap.get(uuid);
+        String packetName = msg.getClass().getSimpleName();
+        if (packetName.equals("PacketPlayOutChat")) {
+            interceptChat(msg, baos);
+        }
+    }
+
+    private void interceptChat(Object msg, ByteArrayOutputStream baos) {
         Object handle = getField(msg, "a");
         if (handle == null) {
             return;
@@ -144,5 +125,10 @@ public class PacketInterceptor {
         } catch (Throwable e) {
             // Ignore
         }
+    }
+
+    public static void shutdown() {
+        interceptMap.clear();
+        dummies.clear();
     }
 }
