@@ -62,8 +62,8 @@
                                 </relocation>
                                 <relocation>
                                     <pattern>dk.lockfuglsang.minecraft</pattern>
-                                    <shadedPattern>dk.lockfuglsang.minecraft</shadedPattern>
-                                    <!--<shadedPattern>dk.lockfuglsang.hgs.minecraft</shadedPattern>-->
+                                    <!--<shadedPattern>dk.lockfuglsang.minecraft</shadedPattern>-->
+                                    <shadedPattern>dk.lockfuglsang.hgs.minecraft</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
