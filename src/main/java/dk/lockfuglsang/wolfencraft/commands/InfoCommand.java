@@ -1,6 +1,7 @@
 package dk.lockfuglsang.wolfencraft.commands;
 
 import dk.lockfuglsang.minecraft.command.AbstractCommand;
+import dk.lockfuglsang.minecraft.util.FormatUtil;
 import dk.lockfuglsang.wolfencraft.HolographicScoreboard;
 import dk.lockfuglsang.wolfencraft.config.ConfigWriter;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
@@ -24,6 +25,8 @@ public class InfoCommand extends AbstractCommand {
             YamlConfiguration c = new YamlConfiguration();
             ConfigWriter.save(c, scoreboard);
             sender.sendMessage(c.saveToString());
+            sender.sendMessage("last output:");
+            sender.sendMessage(FormatUtil.escape(scoreboard.getLastOutput()));
             return true;
         }
         return false;

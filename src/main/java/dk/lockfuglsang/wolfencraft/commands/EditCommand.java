@@ -1,5 +1,6 @@
 package dk.lockfuglsang.wolfencraft.commands;
 
+import dk.lockfuglsang.minecraft.command.AbstractCommand;
 import dk.lockfuglsang.minecraft.command.CompositeCommand;
 import dk.lockfuglsang.wolfencraft.HolographicScoreboard;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
@@ -20,22 +21,28 @@ public class EditCommand extends CompositeCommand {
         add(new RequireScoreboardCommand(plugin, "filter", "reg-ex", "sets the filter") {
             @Override
             protected boolean doExecute(CommandSender sender, String alias, Map<String, Object> map, Scoreboard scoreboard, String... args) {
-                scoreboard.setFilter(args.length > 0 ? args[0] : null);
+                scoreboard.setFilter(join(args));
                 return true;
             }
         });
         add(new RequireScoreboardCommand(plugin, "addfilter", "reg-ex", "adds a filter") {
             @Override
             protected boolean doExecute(CommandSender sender, String alias, Map<String, Object> map, Scoreboard scoreboard, String... args) {
-                String value = args.length > 0 ? args[0] : null;
-                if (value != null) {
+                if (args != null && args.length > 0) {
                     List<String> filter = scoreboard.getFilter();
-                    filter.add(value);
+                    filter.add(join(args));
                     scoreboard.setFilter(filter);
                     return true;
                 } else {
                     return false;
                 }
+            }
+        });
+        add(new RequireScoreboardCommand(plugin, "clearfilter", null, "clears the filter") {
+            @Override
+            protected boolean doExecute(CommandSender sender, String alias, Map<String, Object> map, Scoreboard scoreboard, String... args) {
+                scoreboard.setFilter((String)null);
+                return true;
             }
         });
         add(new RequireScoreboardCommand(plugin, "location", "location", "sets the location of the scoreboard") {
@@ -77,7 +84,10 @@ public class EditCommand extends CompositeCommand {
         if (scoreboard != null) {
             data.put("scoreboard", scoreboard);
             if (super.execute(sender, alias, data, args) && args.length > 2) {
-                sender.sendMessage(plugin.getRM().format("msg.scoreboard.edit", args[1], scoreName, args[2]));
+                String value = AbstractCommand.join(args);
+                value = value.substring(scoreName.length() + args[1].length() + 2);
+                sender.sendMessage(plugin.getRM().format("msg.scoreboard.edit", args[1], scoreName, value));
+                scoreboard.refreshView(plugin);
                 return true;
             }
             return false;

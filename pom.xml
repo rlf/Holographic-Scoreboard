@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.lockfuglsang.wolfencraft</groupId>
     <artifactId>holographic-scoreboard</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
     <name>HolographicScoreboard</name>
     <properties>
-        <bukkit-utils.version>1.9</bukkit-utils.version>
+        <bukkit-utils.version>1.10</bukkit-utils.version>
     </properties>
 
     <repositories>

@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static dk.lockfuglsang.minecraft.reflection.ReflectionUtil.*;
+import static dk.lockfuglsang.minecraft.util.FormatUtil.normalize;
 import static dk.lockfuglsang.wolfencraft.util.TimeUtil.getTicksAsTime;
 
 /**
@@ -32,6 +33,7 @@ import static dk.lockfuglsang.wolfencraft.util.TimeUtil.getTicksAsTime;
  */
 public class Scoreboard {
     private static final Logger log = Logger.getLogger(Scoreboard.class.getName());
+
     public enum Sender { PLAYER, CONSOLE;}
     private String id;
     private String command;
@@ -46,6 +48,7 @@ public class Scoreboard {
 
     private volatile View view;
     private volatile BukkitTask pendingTask;
+    private volatile String lastOut;
 
     public Scoreboard(String id, String refresh, Sender sender, String command, Location location) {
         this.id = id;
@@ -85,9 +88,9 @@ public class Scoreboard {
         replacement = new ArrayList<>();
         for (String f : filter) {
             String[] parts = f.split("=");
-            pattern.add(Pattern.compile(parts[0]));
+            pattern.add(Pattern.compile(normalize(parts[0])));
             if (parts.length == 2) {
-                replacement.add(parts[1]);
+                replacement.add(normalize(parts[1]));
             } else {
                 replacement.add("");
             }
@@ -148,8 +151,10 @@ public class Scoreboard {
             for (int i = 0; i < pattern.size(); i++) {
                 Matcher m = pattern.get(i).matcher(filtered);
                 filtered = m.replaceAll(replacement.get(i));
+                filtered.replaceAll("\n\n", "\n");
             }
         }
+        lastOut = filtered;
         getView().updateView(plugin, filtered);
     }
 
@@ -161,7 +166,6 @@ public class Scoreboard {
         return view;
     }
 
-    // TODO: Cleanup the propertychangelisteners? perhaps a leak?
     private BufferedSender createBufferedSender(final Plugin plugin) {
         if (sender == Sender.CONSOLE) {
             return new BufferedConsoleSender(Bukkit.getConsoleSender());
@@ -186,6 +190,10 @@ public class Scoreboard {
         }
     }
 
+    public String getLastOutput() {
+        return lastOut;
+    }
+
     @Override
     public String toString() {
         return "Scoreboard{" +
@@ -194,6 +202,7 @@ public class Scoreboard {
                 ", location=" + location +
                 ", refreshTicks=" + refreshTicks +
                 ", view=" + view +
+                ", lastOut=" + lastOut +
                 '}';
     }
 
