@@ -5,31 +5,37 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.lockfuglsang.wolfencraft</groupId>
     <artifactId>holographic-scoreboard</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.2</version>
     <name>HolographicScoreboard</name>
     <properties>
-        <bukkit-utils.version>1.10</bukkit-utils.version>
+        <bukkit-utils.version>1.18</bukkit-utils.version>
     </properties>
 
     <repositories>
         <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>Plugin Metrics</id>
-            <url>http://repo.mcstats.org/content/repositories/public</url>
+            <id>spigotmc.org</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/public</url>
         </repository>
         <repository>
             <id>dmulloy2-repo</id>
             <url>http://repo.dmulloy2.net/content/groups/public/</url>
         </repository>
         <repository>
+            <id>bstats-repo</id>
+            <url>http://repo.bstats.org/content/repositories/releases/</url>
+        </repository>
+        <repository>
             <!-- Our repo is last - so we can put in fallback artifacts when the other repos are down -->
-            <id>uSkyBlock-mvn-repo</id>
-            <url>https://raw.github.com/rlf/uSkyBlock/mvn-repo/</url>
+            <id>rlf-mvn-repo</id>
+            <url>https://raw.github.com/rlf/mvn-repo/master/</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>rlf-mvn-repo</id>
+            <url>https://raw.github.com/rlf/mvn-repo/master/</url>
+        </pluginRepository>
+    </pluginRepositories>
     <build>
         <resources>
             <resource>
@@ -40,6 +46,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -58,14 +65,14 @@
                             <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <includes>
-                                    <include>org.mcstats.*:*</include>
-                                    <include>dk.lockfuglsang.minecraft:bukkit-utils</include>
+                                    <include>org.bstats:*</include>
+                                    <include>dk.lockfuglsang.minecraft:*</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.mcstats</pattern>
-                                    <shadedPattern>dk.lockfuglsang.wolfencraft.mcstats</shadedPattern>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>dk.lockfuglsang.hgs.stats</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>dk.lockfuglsang.minecraft</pattern>
@@ -79,6 +86,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
                 <configuration>
                     <finalName>${project.name}</finalName>
                 </configuration>
@@ -89,13 +97,24 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.10-R0.1-SNAPSHOT</version>
+            <version>1.12-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>dk.lockfuglsang.minecraft</groupId>
             <artifactId>bukkit-utils</artifactId>
             <version>${bukkit-utils.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dk.lockfuglsang.minecraft</groupId>
+            <artifactId>po-utils</artifactId>
+            <version>1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>1.2</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -105,17 +124,15 @@
         </dependency>
         <dependency>
             <groupId>com.gmail.filoghost</groupId>
-            <artifactId>holographic-displays-api</artifactId>
-            <version>2.1.17</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/HolographicDisplaysAPI.jar</systemPath>
+            <artifactId>HolographicDisplays</artifactId>
+            <version>2.2.6</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.sainttx.holograms</groupId>
-            <artifactId>holograms</artifactId>
-            <version>2.3-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/Holograms.jar</systemPath>
+            <artifactId>Holograms</artifactId>
+            <version>2.5.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -125,13 +142,7 @@
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib-API</artifactId>
-            <version>LATEST</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mcstats.bukkit</groupId>
-            <artifactId>metrics</artifactId>
-            <version>LATEST</version>
-            <scope>compile</scope>
+            <version>4.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

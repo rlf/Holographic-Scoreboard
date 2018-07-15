@@ -6,7 +6,7 @@ env:
 notifications:
   email: false
 script:
-  - mvn -DskipTests=true install
+  - mvn clean install
 deploy:
   provider: releases
   api-key: ${GITHUB_TOKEN}

@@ -4,17 +4,15 @@ import dk.lockfuglsang.wolfencraft.commands.HGSCommand;
 import dk.lockfuglsang.wolfencraft.config.ConfigWriter;
 import dk.lockfuglsang.wolfencraft.config.Scoreboard;
 import dk.lockfuglsang.wolfencraft.intercept.PacketInterceptor;
-import dk.lockfuglsang.wolfencraft.stats.CommandPlotter;
 import dk.lockfuglsang.wolfencraft.util.ResourceManager;
 import dk.lockfuglsang.wolfencraft.util.TimeUtil;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.mcstats.Metrics;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,13 +23,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * The Main Bukkit Plugin Entry Point
  */
 public final class HolographicScoreboard extends JavaPlugin {
-    public static final String CMD_HGS = "holographicscoreboard";
     private static final Set<Scoreboard> scoreboards = new CopyOnWriteArraySet<>();
     private static final Map<String, BukkitTask> tasks = new HashMap<>();
 
-    private Map<String, CommandPlotter> plotters = new HashMap<>();
-    private Metrics metrics;
-    private Metrics.Graph cmdGraph;
     private final ResourceManager rm = ResourceManager.getRM();
     public static PacketInterceptor interceptor;
 
@@ -42,19 +36,7 @@ public final class HolographicScoreboard extends JavaPlugin {
             getLogger().severe(rm.format("log.missing.dependencies"));
             return;
         }
-        try {
-            metrics = new Metrics(this);
-            cmdGraph = metrics.createGraph("Commands");
-            if (metrics.start()) {
-                getLogger().info(rm.format("log.mcstats.enabled"));
-            } else {
-                getLogger().warning("MCStats was not enabled for HolographicScoreboard");
-                getLogger().info("- isOptOut ; " + metrics.isOptOut());
-                getLogger().info("- config : " + metrics.getConfigFile());
-            }
-        } catch (IOException e) {
-            getLogger().severe(rm.format("log.mcstats.failed", e.getMessage()));
-        }
+
         interceptor = new PacketInterceptor();
         Bukkit.getScheduler().runTaskLater(this, new Runnable() {
             @Override
@@ -62,6 +44,11 @@ public final class HolographicScoreboard extends JavaPlugin {
                 loadScoreboards();
             }
         }, TimeUtil.getTimeAsTicks(getConfig().getString("delayAfterEnable", "30s")));
+        try {
+            new Metrics(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -128,19 +115,6 @@ public final class HolographicScoreboard extends JavaPlugin {
         if (oldTask != null) {
             oldTask.cancel();
         }
-        getPlotter(scoreboard.getCommand()).inc();
-    }
-
-    private synchronized CommandPlotter getPlotter(String command) {
-        if (!plotters.containsKey(command)) {
-            CommandPlotter plotter = new CommandPlotter();
-            plotters.put(command, plotter);
-            if (cmdGraph != null) {
-                cmdGraph.addPlotter(plotter);
-            }
-            // TODO: is metrics.start() required here again?
-        }
-        return plotters.get(command);
     }
 
     @Override
