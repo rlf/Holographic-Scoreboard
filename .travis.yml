@@ -2,14 +2,14 @@ language: java
 sudo: false
 env:
   global:
-    secure: dGzZ9hl0ezUCYs72+Z4LUgtny0qsUn3HibpBKo4hriRPMY8EQqaJfi1ZDQTKr3ctjJMtQtcgnlC0BujEV+1W2tObjSJsCAdEbzKYZijwRXSK5jT1sua3EQScKYelpv0z4fd9LIYJJ95xwXMNMmAFSjdu3fRDkxtGgIIKbka8YiE=
+  - secure: H8KmGcatFptSW5Mvbplqa3vtTvDwIPzMhwu4FNZbNmr8zc+8NFN1Lgw5YP4sdL86BQoAerQ8hrhRMH5xfPjLJdtIjGBKqPrRIxmu+X9zWwuat7S4x5P3R0HAR4LrhAVPcnWhimfgyOJQF98ko51ipnCnkI5ZVf7BKd9MvfutFgc=
 notifications:
   email: false
 script:
-  - mvn clean install
+- mvn clean install
 deploy:
   provider: releases
-  api-key: ${GITHUB_TOKEN}
+  api-key: "${GITHUB_TOKEN}"
   file:
   - target/HolographicScoreboard.jar
   skip_cleanup: true
@@ -18,4 +18,4 @@ deploy:
     all_branches: true
 cache:
   directories:
-  - $HOME/.m2
+  - "$HOME/.m2"
